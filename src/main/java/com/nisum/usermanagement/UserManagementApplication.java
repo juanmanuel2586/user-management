@@ -1,4 +1,4 @@
-package com.nisum.user_management;
+package com.nisum.usermanagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
