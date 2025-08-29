@@ -69,7 +69,8 @@ public class User {
   )
   private Set<Phone> phones = new HashSet<>();
 
-  public User(String name, String email, String passwordHash, String token) {
+  public User(String id, String name, String email, String passwordHash, String token) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.passwordHash = passwordHash;

@@ -4,23 +4,28 @@ import com.nisum.usermanagement.domain.Phone;
 import com.nisum.usermanagement.domain.User;
 import com.nisum.usermanagement.dto.PhoneDto;
 import com.nisum.usermanagement.dto.UserDto;
+import com.nisum.usermanagement.dto.request.UserRequest;
 import com.nisum.usermanagement.exception.NotFoundException;
 import com.nisum.usermanagement.repository.UserRepository;
 import com.nisum.usermanagement.service.UserService;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +62,39 @@ public class UserServiceImpl implements UserService {
                 u.getToken(),
                 phones
         );
+    }
+
+    @Transactional
+    public UserDto create(UserRequest request, String token) {
+        // Validar email único
+        if (userRepository.existsByEmailIgnoreCase(request.email())) {
+            throw new IllegalArgumentException("El correo ya está registrado");
+        }
+
+        // Hash de contraseña (ejemplo usando BCryptPasswordEncoder)
+        String hashed = passwordEncoder.encode(request.password());
+
+        // Generar token (UUID o JWT simplificado)
+        String id = UUID.randomUUID().toString();
+
+        User user = new User(
+                id,
+                request.name(),
+                request.email(),
+                hashed,
+                token
+        );
+
+        // Mapear teléfonos
+        if (request.phones() != null) {
+            request.phones().forEach(p -> {
+                Phone phone = new Phone(p.number(), p.cityCode(), p.countryCode(), user);
+                user.addPhone(phone);
+            });
+        }
+
+        User saved = userRepository.save(user);
+        return toDto(saved);
     }
 }
 

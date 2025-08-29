@@ -1,4 +1,4 @@
-package com.nisun.user_management;
+package com.nisum.usermanagement;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
