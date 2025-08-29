@@ -71,10 +71,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("El correo ya está registrado");
         }
 
-        // Hash de contraseña (ejemplo usando BCryptPasswordEncoder)
         String hashed = passwordEncoder.encode(request.password());
-
-        // Generar token (UUID o JWT simplificado)
         String id = UUID.randomUUID().toString();
 
         User user = new User(
@@ -84,8 +81,6 @@ public class UserServiceImpl implements UserService {
                 hashed,
                 token
         );
-
-        // Mapear teléfonos
         if (request.phones() != null) {
             request.phones().forEach(p -> {
                 Phone phone = new Phone(p.number(), p.cityCode(), p.countryCode(), user);
