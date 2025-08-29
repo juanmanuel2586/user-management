@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: user-management
+  datasource:
+    url: jdbc:h2:mem:userdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none          # Usaremos schema.sql
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  sql:
+    init:
+      mode: always            # Ejecutar schema.sql y data.sql al inicio
+      encoding: UTF-8
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+logging:
+  level:
+    org.hibernate.SQL: info
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui/index.html
+    operationsSorter: method
+    tagsSorter: alpha
+
+app:
+  password:
+    # Al menos 1 mayúscula, 1 minúscula, 1 dígito, 1 símbolo, entre 8 y 64 chars
+    regex: "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[\\W_]).{8,64}$"
+    message: "La contraseña debe tener 8-64 caract., con mayúscula, minúscula, dígito y símbolo"
