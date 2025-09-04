@@ -9,6 +9,6 @@ public interface UserService {
 
     public UserDto getByEmail(String email);
 
-    public UserDto create(UserRequest request, String token);
+    public UserDto create(UserRequest request);
     
 }

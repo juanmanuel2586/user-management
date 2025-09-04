@@ -5,9 +5,11 @@ import com.nisum.usermanagement.domain.User;
 import com.nisum.usermanagement.dto.PhoneDto;
 import com.nisum.usermanagement.dto.UserDto;
 import com.nisum.usermanagement.dto.request.UserRequest;
+import com.nisum.usermanagement.exception.EmailConflictExpection;
 import com.nisum.usermanagement.exception.NotFoundException;
 import com.nisum.usermanagement.repository.UserRepository;
 import com.nisum.usermanagement.service.UserService;
+import com.nisum.usermanagement.utils.JwtUtil;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -22,10 +25,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Transactional(readOnly = true)
@@ -65,15 +70,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public UserDto create(UserRequest request, String token) {
+    public UserDto create(UserRequest request) {
         // Validar email único
         if (userRepository.existsByEmailIgnoreCase(request.email())) {
-            throw new IllegalArgumentException("El correo ya está registrado");
+            throw new EmailConflictExpection("El correo ya está registrado");
         }
 
         String hashed = passwordEncoder.encode(request.password());
         String id = UUID.randomUUID().toString();
 
+        Map<String, Object> claims = Map.of("name", request.name());
+        String token = jwtUtil.generate(request.email(), claims);
         User user = new User(
                 id,
                 request.name(),
