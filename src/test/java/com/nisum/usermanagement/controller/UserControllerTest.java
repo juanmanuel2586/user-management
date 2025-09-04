@@ -22,8 +22,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -60,14 +58,6 @@ class UserControllerTest {
         );
     }
 
-    private UserRequest validRequest() {
-        return new UserRequest(
-                "Juan Gonzalez",
-                "juan.gonzalez@example.com",
-                "Test123", 
-                List.of(new PhoneRequest("1234567", "1", "57"))
-        );
-    }
 
     @Test
     @DisplayName("GET /api/user/{id} → 200 OK")
@@ -116,19 +106,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.token").value("jwt-or-uuid-token"));
     }
 */
-    @Test
-    @DisplayName("POST /api/user sin Authorization → 401 Unauthorized con mensaje")
-    void create_missingAuthorization_401() throws Exception {
-        var req = validRequest();
-
-        mockMvc.perform(post("/api/user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.mensaje", containsString("Authorization")));
-    }
 
     @Test
     @DisplayName("POST /api/user con password inválida → 400 Bad Request con mensaje configurado")

@@ -65,6 +65,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
     }
 
+    // Email duplicado marcar como 409 Conflict
+    @ExceptionHandler(EmailConflictExpection.class)
+    public ResponseEntity<ErrorResponse> handleEmailConflictException(EmailConflictExpection ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
+    }
+
       // Falta header Authorization
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ErrorResponse> handleMissingHeader(MissingRequestHeaderException ex) {

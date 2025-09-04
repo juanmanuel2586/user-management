@@ -53,6 +53,10 @@ app:
   password:
     regex: "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[\\W_]).{8,64}$"
     message: "La contraseña debe tener 8-64 caract., con mayúscula, minúscula, dígito y símbolo"
+  jwt:
+    secret: "nisum-bci-user-management-secret"
+    issuer: "user-management"
+    expiration-millis: 3600000
 ```
 
 ---
@@ -98,7 +102,7 @@ Relación: **User 1..N Phone**
 |-------:|----------------------|-------------------------------------|:----:|
 | GET    | `/api/user/{id}`     | Obtener usuario por **ID**          |  No  |
 | GET    | `/api/user?email=..` | Obtener usuario por **email**       |  No  |
-| POST   | `/api/user`          | Crear usuario + teléfonos           | ✅ Sí |
+| POST   | `/api/user`          | Crear usuario + teléfonos           |  No  |
 
 ### Ejemplo `POST /api/user` (request)
 
@@ -107,8 +111,11 @@ Relación: **User 1..N Phone**
   "name": "Juan Perez",
   "email": "juan.perez@example.com",
   "password": "Ja12345678.*",
-  "phones": [
-    { "number": "1234567", "cityCode": "1", "countryCode": "57" }
+  "phones": [{ 
+      "number": "1234567", 
+      "cityCode": "1", 
+      "countryCode": "57" 
+    }
   ]
 }
 ```
@@ -116,7 +123,6 @@ Relación: **User 1..N Phone**
 **Headers:**
 ```
 Content-Type: application/json
-Authorization: Bearer <tu_token>
 ```
 
 ### Respuesta 201 (ejemplo)
@@ -158,14 +164,9 @@ Generar reporte de cobertura:
 
 ---
 
-## 🛡️ Seguridad
-
-- El **POST /api/user** requiere:  
-  `Authorization: Bearer <token>`
-
 Errores:
-- **401** → falta o formato incorrecto en el header  
-- **400** → contraseña no cumple regex u otra validación  
+- **400** → Datos de entrada inválidos o no cumple con el formato esperado  
+- **409** → Email proporcionado ya esta registrado  
 
 Formato de errores:
 

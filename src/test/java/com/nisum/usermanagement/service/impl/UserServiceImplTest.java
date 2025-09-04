@@ -5,8 +5,11 @@ import com.nisum.usermanagement.domain.User;
 import com.nisum.usermanagement.dto.UserDto;
 import com.nisum.usermanagement.dto.request.PhoneRequest;
 import com.nisum.usermanagement.dto.request.UserRequest;
+import com.nisum.usermanagement.exception.EmailConflictExpection;
 import com.nisum.usermanagement.exception.NotFoundException;
 import com.nisum.usermanagement.repository.UserRepository;
+import com.nisum.usermanagement.utils.JwtUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +26,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class UserServiceImplTest {
@@ -31,6 +36,9 @@ class UserServiceImplTest {
 	private UserRepository userRepository;
 	@Mock
 	private PasswordEncoder passwordEncoder;
+
+	@Mock 
+	private JwtUtil jwtUtil;
 
 	@InjectMocks
 	private UserServiceImpl userService;
@@ -89,7 +97,8 @@ class UserServiceImplTest {
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 		User savedUser = mockUser(UUID.randomUUID().toString());
 		when(userRepository.save(userCaptor.capture())).thenReturn(savedUser);
-		UserDto dto = userService.create(request, "token");
+        when(jwtUtil.generate(eq("new@example.com"), anyMap())).thenReturn("jwt-token");
+		UserDto dto = userService.create(request);
 		assertEquals(savedUser.getEmail(), dto.email());
 		assertEquals(savedUser.getPhones().size(), dto.phones().size());
 		verify(userRepository).save(any(User.class));
@@ -100,7 +109,7 @@ class UserServiceImplTest {
 		UserRequest request = mock(UserRequest.class);
 		when(request.email()).thenReturn("exists@example.com");
 		when(userRepository.existsByEmailIgnoreCase("exists@example.com")).thenReturn(true);
-		assertThrows(IllegalArgumentException.class, () -> userService.create(request, "token"));
+		assertThrows(EmailConflictExpection.class, () -> userService.create(request));
 	}
 
 	private User mockUser(String id) {
